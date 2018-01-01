@@ -187,7 +187,7 @@ func (e *FsEvent) IsFileModified() bool {
 	return ((CheckMask(Modified, e.RawEvent.Mask) == true) && (e.IsDirEvent() == false))
 }
 func (e *FsEvent) IsFileCloseWrite() bool {
-	return CheckMask(CloseWrite, e.RawEvent.Mask) == true
+	return ((CheckMask(CloseWrite, e.RawEvent.Mask) == true) && (e.IsDirEvent() == false))
 }
 
 var (
