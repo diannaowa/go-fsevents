@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 	"unsafe"
-
+	"log"
 	"golang.org/x/sys/unix"
 )
 
@@ -105,7 +105,7 @@ const (
 	FileRemovedEvent = MovedFrom | Delete
 	FileCreatedEvent = MovedTo | Create
 	FileChangedEvent = CloseWrite | Modified | AttrChange
-
+	FileCloseWriteEvent = CloseWrite
 	// Root watch directory events
 	RootEvent = RootDelete | RootMove
 )
@@ -184,7 +184,12 @@ func (e *FsEvent) IsFileChanged() bool {
 		((CheckMask(Modified, e.RawEvent.Mask) == true) && (e.IsDirEvent() == false)) ||
 		((CheckMask(AttrChange, e.RawEvent.Mask) == true) && (e.IsDirEvent() == false))
 }
-
+func (e *FsEvent) IsFileModified() bool {
+	return ((CheckMask(Modified, e.RawEvent.Mask) == true) && (e.IsDirEvent() == false))
+}
+func (e *FsEvent) IsFileCloseWrite() bool {
+	return CheckMask(CloseWrite, e.RawEvent.Mask) == true
+}
 var (
 	// All the errors returned by fsevents
 	// Should probably provide a more situationally descriptive message along with it
@@ -306,6 +311,9 @@ func (w *Watcher) AddDescriptor(dirPath string, mask int) error {
 
 	w.Lock()
 	w.Descriptors[dirPath] = newWatchDescriptor(dirPath, inotifymask)
+	w.Descriptors[dirPath].Start(w.FileDescriptor)
+        log.Println("AddDescriptor:",dirPath)
+	log.Println("AddDescriptor:",inotifymask)
 	w.Unlock()
 
 	return nil
