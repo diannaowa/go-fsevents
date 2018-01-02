@@ -77,6 +77,7 @@ const (
 	RootDelete = unix.IN_DELETE_SELF
 	RootMove   = unix.IN_MOVE_SELF
 	IsDir      = unix.IN_ISDIR
+	OneShot    = unix.IN_ONESHOT
 
 	AllEvents = (Accessed | Modified | AttrChange | CloseWrite | CloseRead | Open | MovedFrom |
 		MovedTo | MovedTo | Create | Delete | RootDelete | RootMove | IsDir)
