@@ -77,7 +77,6 @@ const (
 	RootDelete = unix.IN_DELETE_SELF
 	RootMove   = unix.IN_MOVE_SELF
 	IsDir      = unix.IN_ISDIR
-	OneShot    = unix.IN_ONESHOT
 
 	AllEvents = (Accessed | Modified | AttrChange | CloseWrite | CloseRead | Open | MovedFrom |
 		MovedTo | MovedTo | Create | Delete | RootDelete | RootMove | IsDir)
@@ -286,11 +285,13 @@ func (w *Watcher) RemoveDescriptor(path string) error {
 	defer w.Unlock()
 	descriptor := w.Descriptors[path]
 	if descriptor.DoesPathExist() == true {
+
 		if err := descriptor.Stop(descriptor.WatchDescriptor); err != nil {
 			return err
 		}
 	}
 	delete(w.Descriptors, path)
+
 	return nil
 }
 
@@ -448,6 +449,7 @@ func (w *Watcher) Watch() {
 
 			if descriptor == nil {
 				w.Errors <- ErrDescForEventNotFound
+				offset += (unix.SizeofInotifyEvent + rawEvent.Len)
 				continue
 			}
 
